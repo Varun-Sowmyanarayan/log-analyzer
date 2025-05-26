@@ -1,18 +1,132 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>IP Reputation Checker</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LLM Logs Analyzer - Supercharged</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #121212;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+  textarea {
+    width: 90%;
+    height: 200px;
+    background: #222;
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    color: #eee;
+    font-family: monospace;
+    font-size: 1rem;
+    padding: 1rem;
+    resize: vertical;
+  }
+  button {
+    margin-top: 1rem;
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    background: #4caf50;
+    border: none;
+    border-radius: 6px;
+    color: #121212;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+  }
+  button:hover {
+    background: #66bb6a;
+  }
+  #result {
+    margin-top: 2rem;
+    background: #222;
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    width: 90%;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 1rem;
+  }
+</style>
 </head>
 <body>
-    <h1>Check IP Reputation</h1>
-    <form method="POST">
-        <input type="text" name="ip_address" placeholder="Enter IP address" required>
-        <button type="submit">Check</button>
-    </form>
 
-    {% if result %}
-        <p>Result: {{ result }}</p>
-    {% endif %}
+<h1>LLM Logs Analyzer 🚀</h1>
+
+<textarea id="logInput" placeholder="Paste your LLM logs here..."></textarea>
+<button id="analyzeBtn">Analyze Logs</button>
+
+<div id="result">Waiting for your input...</div>
+
+<script>
+  function analyzeLogs(text) {
+    if (!text.trim()) {
+      return "Please paste some logs to analyze!";
+    }
+
+    const lines = text.split(/\r?\n/);
+    const totalLines = lines.length;
+
+    // Total characters excluding trailing spaces
+    const totalChars = text.replace(/\s+$/gm, '').length;
+
+    // Word count (split by whitespace)
+    const wordsArray = text.trim().split(/\s+/);
+    const totalWords = wordsArray.length;
+
+    // Frequency of words (case-insensitive)
+    const freqMap = {};
+    wordsArray.forEach(word => {
+      const w = word.toLowerCase().replace(/[^\w]/g, '');
+      if (w) {
+        freqMap[w] = (freqMap[w] || 0) + 1;
+      }
+    });
+
+    // Sort by frequency desc, get top 5
+    const topWords = Object.entries(freqMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    // Find longest line by character count
+    let longestLine = "";
+    let maxLen = 0;
+    lines.forEach(line => {
+      if (line.length > maxLen) {
+        maxLen = line.length;
+        longestLine = line;
+      }
+    });
+
+    let result = `Analysis Results:\n`;
+    result += `- Total Lines: ${totalLines}\n`;
+    result += `- Total Characters: ${totalChars}\n`;
+    result += `- Total Words: ${totalWords}\n\n`;
+
+    result += `Top 5 Most Frequent Words:\n`;
+    topWords.forEach(([word, count], i) => {
+      result += `  ${i + 1}. "${word}" : ${count} times\n`;
+    });
+
+    result += `\nLongest Line (${maxLen} chars):\n"${longestLine}"\n`;
+
+    return result;
+  }
+
+  document.getElementById('analyzeBtn').addEventListener('click', () => {
+    const logs = document.getElementById('logInput').value;
+    const analysis = analyzeLogs(logs);
+    document.getElementById('result').textContent = analysis;
+  });
+</script>
+
 </body>
 </html>
+
 
